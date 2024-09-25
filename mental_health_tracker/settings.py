@@ -21,14 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=6o_%7_z6@=o*_a^q3ea=zf8!n#!am36d5780h6s!gh#svxr8g'
+SECRET_KEY = 'django-insecure-e^e+-&c04g6*dh-=r@z9wm@zm$w8__t-0^423@i26v#&t7ol#f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 PRODUCTION = os.getenv("PRODUCTION", False)
 DEBUG = not PRODUCTION
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "shintia-dharma-mentalhealthtracker.pbp.cs.ui.ac.id"]
-
 
 # Application definition
 
@@ -39,11 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'main'
+    'main',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -118,11 +118,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static' # merujuk ke /static root project pada mode development
+    ]
+else:
+    STATIC_ROOT = BASE_DIR / 'static' # merujuk ke /static root project pada mode production
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1", "http://pbp.cs.ui.ac.id/web/project/shintia.dharma/mentalhealthtracker2", "https://pbp.cs.ui.ac.id/web/project/shintia.dharma/mentalhealthtracker2"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost","http://127.0.0.1", "http://pbp.cs.ui.ac.id/web/project/shintia.dharma/mentalhealthtracker", "https://pbp.cs.ui.ac.id/web/project/shintia.dharma/mentalhealthtracker"]
