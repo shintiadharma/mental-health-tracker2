@@ -1,27 +1,26 @@
 from django.shortcuts import render, redirect, reverse 
 from main.forms import MoodEntryForm
 from main.models import MoodEntry
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core import serializers
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 import datetime
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils.html import strip_tags
+import json
 
 @login_required(login_url='/login')
-
 def show_main(request):
     context = {
         'name': request.user.username,
         'class': 'PBP F',
         'npm': '2306245655',
-        'last_login': request.COOKIES['last_login'],
+        'last_login': request.COOKIES.get('last_login', 'Unknown'),
     }
 
     return render(request, "main.html", context)
@@ -78,6 +77,8 @@ def login_user(request):
             return response
         else:
             messages.error(request, "Invalid username or password. Please try again.")
+            # Menambahkan return untuk merender kembali halaman login dengan formulir yang diisi
+            return render(request, 'login.html', {'form': form})
 
     else:
         form = AuthenticationForm(request)
@@ -92,7 +93,7 @@ def logout_user(request):
 
 def edit_mood(request, id):
     # Get mood entry berdasarkan id
-    mood = MoodEntry.objects.get(pk = id)
+    mood = MoodEntry.objects.get(pk=id)
 
     # Set mood entry sebagai instance dari form
     form = MoodEntryForm(request.POST or None, instance=mood)
@@ -107,7 +108,7 @@ def edit_mood(request, id):
 
 def delete_mood(request, id):
     # Get mood berdasarkan id
-    mood = MoodEntry.objects.get(pk = id)
+    mood = MoodEntry.objects.get(pk=id)
     # Hapus mood
     mood.delete()
     # Kembali ke halaman awal
@@ -129,3 +130,21 @@ def add_mood_entry_ajax(request):
     new_mood.save()
 
     return HttpResponse(b"CREATED", status=201)
+
+@csrf_exempt
+def create_mood_flutter(request):
+    if request.method == 'POST':
+
+        data = json.loads(request.body)
+        new_mood = MoodEntry.objects.create(
+            user=request.user,
+            mood=data["mood"],
+            mood_intensity=int(data["mood_intensity"]),
+            feelings=data["feelings"]
+        )
+
+        new_mood.save()
+
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
